@@ -6,9 +6,10 @@ import MainLayout from './components/mainLayout/MainLayout'
 import Toaster from './components/toaster/Toaster'
 import FeedScroller from './components/mainLayout/FeedScroller'
 import StoryScroller from './components/mainLayout/StoryScroller'
-import { AuthToken, User, FakeData } from 'tweeter-shared'
 import UserItemScroller from './components/mainLayout/UserItemScroller'
 import useUserInfo from './components/userInfo/UserInfoHook'
+import { FollowingPresenter } from './presenter/FollowingPresenter'
+import { FollowerPresenter } from './presenter/FollowersPresenter'
 
 const App = () => {
     const { currentUser, authToken } = useUserInfo()
@@ -26,26 +27,6 @@ const App = () => {
 }
 
 const AuthenticatedRoutes = () => {
-    const loadMoreFollowers = async (
-        authToken: AuthToken,
-        user: User,
-        pageSize: number,
-        lastItem: User | null
-    ): Promise<[User[], boolean]> => {
-        // TODO: Replace with the result of calling server
-        return FakeData.instance.getPageOfUsers(lastItem, pageSize, user)
-    }
-
-    const loadMoreFollowees = async (
-        authToken: AuthToken,
-        user: User,
-        pageSize: number,
-        lastItem: User | null
-    ): Promise<[User[], boolean]> => {
-        // TODO: Replace with the result of calling server
-        return FakeData.instance.getPageOfUsers(lastItem, pageSize, user)
-    }
-
     return (
         <Routes>
             <Route element={<MainLayout />}>
@@ -54,11 +35,11 @@ const AuthenticatedRoutes = () => {
                 <Route path="story" element={<StoryScroller />} />
                 <Route
                     path="following"
-                    element={<UserItemScroller loadItems={loadMoreFollowees} itemDescription="followees" />}
+                    element={<UserItemScroller presenterGenerator={(view) => new FollowingPresenter(view)} />}
                 />
                 <Route
                     path="followers"
-                    element={<UserItemScroller loadItems={loadMoreFollowers} itemDescription="followers" />}
+                    element={<UserItemScroller presenterGenerator={(view) => new FollowerPresenter(view)} />}
                 />
                 <Route path="logout" element={<Navigate to="/login" />} />
                 <Route path="*" element={<Navigate to="/feed" />} />

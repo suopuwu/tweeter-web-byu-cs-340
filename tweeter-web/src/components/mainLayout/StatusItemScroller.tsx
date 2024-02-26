@@ -1,9 +1,10 @@
-import { AuthToken, FakeData, Status, User } from 'tweeter-shared'
+import { AuthToken, Status, User } from 'tweeter-shared'
 import { useState, useRef, useEffect } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import useToastListener from '../toaster/ToastListenerHook'
 import StatusItem from '../statusItem/StatusItem'
 import useUserInfo from '../userInfo/UserInfoHook'
+import { StatusListPresenter, StatusListView } from '../../presenter/StatusListPresenter'
 
 export const PAGE_SIZE = 10
 
@@ -19,16 +20,18 @@ interface Props {
 const StatusItemScroller = (props: Props) => {
     const { displayErrorMessage } = useToastListener()
     const [items, setItems] = useState<Status[]>([])
-    const [hasMoreItems, setHasMoreItems] = useState(true)
-    const [lastItem, setLastItem] = useState<Status | null>(null)
 
     // Required to allow the addItems method to see the current value of 'items'
     // instead of the value from when the closure was created.
     const itemsReference = useRef(items)
     itemsReference.current = items
 
-    const addItems = (newItems: Status[]) => setItems([...itemsReference.current, ...newItems])
+    const view: StatusListView = {
+        addItems: (newItems: Status[]) => setItems([...itemsReference.current, ...newItems]),
+        displayErrorMessage: displayErrorMessage,
+    }
 
+    const presenter = new StatusListPresenter(view, props.loadFunction)
     const { displayedUser, setDisplayedUser, currentUser, authToken } = useUserInfo()
 
     // Load initial items
@@ -37,28 +40,8 @@ const StatusItemScroller = (props: Props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const loadMoreItems = async () => {
-        try {
-            if (hasMoreItems) {
-                let [newItems, hasMore] = await props.loadFunction(authToken!, displayedUser!, PAGE_SIZE, lastItem)
-
-                setHasMoreItems(hasMore)
-                setLastItem(newItems[newItems.length - 1])
-                addItems(newItems)
-            }
-        } catch (error) {
-            displayErrorMessage(`Failed to load items because of exception: ${error}`)
-        }
-    }
-
-    const extractAlias = (value: string): string => {
-        let index = value.indexOf('@')
-        return value.substring(index)
-    }
-
-    const getUser = async (authToken: AuthToken, alias: string): Promise<User | null> => {
-        // TODO: Replace with the result of calling server
-        return FakeData.instance.findUserByAlias(alias)
+    async function loadMoreItems() {
+        await presenter.loadMoreItems(authToken!, displayedUser!)
     }
 
     return (
@@ -67,7 +50,7 @@ const StatusItemScroller = (props: Props) => {
                 className="pr-0 mr-0"
                 dataLength={items.length}
                 next={loadMoreItems}
-                hasMore={hasMoreItems}
+                hasMore={presenter.hasMoreItems}
                 loader={<h4>Loading...</h4>}
             >
                 {items.map((item, index) => (

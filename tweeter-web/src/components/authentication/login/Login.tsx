@@ -4,10 +4,10 @@ import 'bootstrap/dist/css/bootstrap.css'
 import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthenticationFormLayout from '../AuthenticationFormLayout'
-import { AuthToken, FakeData, User } from 'tweeter-shared'
 import useToastListener from '../../toaster/ToastListenerHook'
 import AliasPasswordFields from '../AliasPasswordFields'
 import useUserInfo from '../../userInfo/UserInfoHook'
+import { LoginPresenter, LoginView } from '../../../presenter/LoginPresenter'
 
 interface Props {
     originalUrl?: string
@@ -16,44 +16,12 @@ interface Props {
 const Login = (props: Props) => {
     const [alias, setAlias] = useState('')
     const [password, setPassword] = useState('')
-    const [rememberMe, setRememberMe] = useState(false)
 
-    const navigate = useNavigate()
-    const { updateUserInfo } = useUserInfo()
     const { displayErrorMessage } = useToastListener()
-
-    const rememberMeRef = useRef(rememberMe)
-    rememberMeRef.current = rememberMe
+    const { updateUserInfo } = useUserInfo()
 
     const checkSubmitButtonStatus = (): boolean => {
         return !alias || !password
-    }
-
-    const doLogin = async () => {
-        try {
-            let [user, authToken] = await login(alias, password)
-
-            updateUserInfo(user, user, authToken, rememberMeRef.current)
-
-            if (!!props.originalUrl) {
-                navigate(props.originalUrl)
-            } else {
-                navigate('/')
-            }
-        } catch (error) {
-            displayErrorMessage(`Failed to log user in because of exception: ${error}`)
-        }
-    }
-
-    const login = async (alias: string, password: string): Promise<[User, AuthToken]> => {
-        // TODO: Replace with the result of calling the server
-        let user = FakeData.instance.firstUser
-
-        if (user === null) {
-            throw new Error('Invalid alias or password')
-        }
-
-        return [user, FakeData.instance.authToken]
     }
 
     const inputFieldGenerator = () => {
@@ -68,6 +36,13 @@ const Login = (props: Props) => {
         )
     }
 
+    const doLogin = async () => await presenter.doLogin(alias, password, props.originalUrl)
+
+    const view: LoginView = {
+        updateUserInfo: updateUserInfo,
+        displayErrorMessage: displayErrorMessage,
+    }
+    const presenter = new LoginPresenter(view)
     return (
         <AuthenticationFormLayout
             headingText="Please Sign In"
@@ -75,7 +50,7 @@ const Login = (props: Props) => {
             oAuthHeading="Sign in with:"
             inputFieldGenerator={inputFieldGenerator}
             switchAuthenticationMethodGenerator={switchAuthenticationMethodGenerator}
-            setRememberMe={setRememberMe}
+            setRememberMe={presenter.setRememberMe}
             submitButtonDisabled={checkSubmitButtonStatus}
             submit={doLogin}
         />
