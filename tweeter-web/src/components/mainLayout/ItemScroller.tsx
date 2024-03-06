@@ -1,25 +1,34 @@
-import { AuthToken, User } from 'tweeter-shared'
-import { useState, useRef, useEffect } from 'react'
+import { Status } from 'tweeter-shared'
+import { useState, useRef, useEffect, ReactNode } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
-import UserItem from '../userItem/UserItem'
 import useToastListener from '../toaster/ToastListenerHook'
 import useUserInfo from '../userInfo/UserInfoHook'
-import { UserItemPresenter, UserItemView } from '../../presenter/UserItemPresenter'
+import { PagedListPresenter, PagedListView } from '../../presenter/PagedListPresenter'
+
+export const PAGE_SIZE = 10
 
 interface Props {
-    presenterGenerator: (view: UserItemView) => UserItemPresenter
+    presenterGenerator: (view: PagedListView<any>) => PagedListPresenter<any, any>
+    itemComponentGenerator: (item: any, key: number) => ReactNode
 }
 
-const UserItemScroller = (props: Props) => {
+const ItemScroller = (props: Props) => {
     const { displayErrorMessage } = useToastListener()
-    const [items, setItems] = useState<User[]>([])
+    const [items, setItems] = useState<Status[]>([])
 
     // Required to allow the addItems method to see the current value of 'items'
     // instead of the value from when the closure was created.
     const itemsReference = useRef(items)
     itemsReference.current = items
 
-    const { displayedUser, authToken } = useUserInfo()
+    const view: PagedListView<Status> = {
+        addItems: (newItems: Status[]) => setItems([...itemsReference.current, ...newItems]),
+        displayErrorMessage: displayErrorMessage,
+    }
+
+    const [presenter] = useState(props.presenterGenerator(view))
+
+    const { displayedUser, setDisplayedUser, currentUser, authToken } = useUserInfo()
 
     // Load initial items
     useEffect(() => {
@@ -27,12 +36,6 @@ const UserItemScroller = (props: Props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const listener: UserItemView = {
-        addItems: (items: User[]) => setItems([...itemsReference.current, ...items]),
-        displayErrorMessage: displayErrorMessage,
-    }
-
-    const [presenter] = useState(props.presenterGenerator(listener))
     async function loadMoreItems() {
         await presenter.loadMoreItems(authToken!, displayedUser!)
     }
@@ -46,14 +49,9 @@ const UserItemScroller = (props: Props) => {
                 hasMore={presenter.hasMoreItems}
                 loader={<h4>Loading...</h4>}
             >
-                {items.map((item, index) => (
-                    <div key={index} className="row mb-3 mx-0 px-0 border rounded bg-white">
-                        <UserItem value={item} />
-                    </div>
-                ))}
+                {items.map((item, index) => props.itemComponentGenerator(item, index))}
             </InfiniteScroll>
         </div>
     )
 }
-
-export default UserItemScroller
+export default ItemScroller

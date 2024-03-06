@@ -1,34 +1,32 @@
 import { AuthToken, Status, User } from 'tweeter-shared'
+import { StatusService } from '../model/StatusService'
+import { BasePresenter, BaseView, MessageView } from './BasePresenter'
 
-export interface PostStatusView {
+export interface PostStatusView extends MessageView {
     post: string
     setPost: React.Dispatch<React.SetStateAction<string>>
-    displayErrorMessage: (message: string, bootstrapClasses?: string | undefined) => void
-    displayInfoMessage: (message: string, duration: number, bootstrapClasses?: string | undefined) => void
-    clearLastInfoMessage: () => void
 }
 
-export class PostStatusPresenter {
-    private view
+export class PostStatusPresenter extends BasePresenter<PostStatusView> {
+    private service
     constructor(view: PostStatusView) {
-        this.view = view
+        super(view)
+        this.service = new StatusService()
     }
     async submitPost(event: React.MouseEvent, authToken: AuthToken | null, currentUser: User | null) {
         event.preventDefault()
 
-        try {
+        this.tryWithReporting('post the status', async () => {
             this.view.displayInfoMessage('Posting status...', 0)
 
             let status = new Status(this.view.post, currentUser!, Date.now())
 
-            await this.postStatus(authToken!, status)
+            await this.service.postStatus(authToken!, status)
 
             this.view.clearLastInfoMessage()
             this.view.setPost('')
             this.view.displayInfoMessage('Status posted!', 2000)
-        } catch (error) {
-            this.view.displayErrorMessage(`Failed to post the status because of exception: ${error}`)
-        }
+        })
     }
 
     clearPost(event: React.MouseEvent) {

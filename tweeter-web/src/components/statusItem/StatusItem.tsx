@@ -4,7 +4,6 @@ import Post from './Post'
 import useNavToUser from '../navigation/NavigationHook'
 
 interface Props {
-    key: number
     status: Status
 }
 
@@ -13,7 +12,7 @@ const StatusItem = (props: Props) => {
     const { navigateToUser } = useNavToUser()
 
     return (
-        <div key={props.key} className="row mb-3 mx-0 px-0 border rounded bg-white">
+        <div className="row mb-3 mx-0 px-0 border rounded bg-white">
             <div className="col bg-light mx-0 px-0">
                 <div className="container px-0">
                     <div className="row mx-0 px-0">

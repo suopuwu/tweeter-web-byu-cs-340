@@ -1,24 +1,23 @@
 import { AuthToken, User } from 'tweeter-shared'
 import { UserService } from '../model/UserService'
 import useUserInfo from '../components/userInfo/UserInfoHook'
+import { BasePresenter, BaseView } from './BasePresenter'
 
-export interface NavigationView {
-    displayErrorMessage: (message: string, bootstrapClasses?: string | undefined) => void
+export interface NavigationView extends BaseView {
     setDisplayedUser: (user: User) => void
     currentUser: User | null
     authToken: AuthToken | null
 }
 
-export class NavigationPresenter {
-    private view
+export class NavigationPresenter extends BasePresenter<NavigationView> {
     private service: UserService
     constructor(view: NavigationView) {
-        this.view = view
+        super(view)
         this.service = new UserService()
     }
 
     async navigateToUser(alias: string): Promise<void> {
-        try {
+        this.tryWithReporting('get user', async () => {
             let user = await this.service.findUserByAlias(alias)
 
             if (!!user) {
@@ -28,9 +27,7 @@ export class NavigationPresenter {
                     this.view.setDisplayedUser(user)
                 }
             }
-        } catch (error) {
-            this.view.displayErrorMessage(`Failed to get user because of exception: ${error}`)
-        }
+        })
     }
 
     extractAlias(value: string): string {

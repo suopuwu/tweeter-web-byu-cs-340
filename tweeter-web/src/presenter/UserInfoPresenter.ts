@@ -1,10 +1,8 @@
 import { AuthToken, User } from 'tweeter-shared'
 import { UserService } from '../model/UserService'
+import { BasePresenter, BaseView, MessageView } from './BasePresenter'
 
-export interface UserInfoView {
-    displayErrorMessage: (message: string) => void
-    displayInfoMessage: (message: string, duration: number, bootstrapClasses?: string | undefined) => void
-    clearLastInfoMessage: () => void
+export interface UserInfoView extends MessageView {
     currentUser: User | null
     authToken: AuthToken | null
     displayedUser: User | null
@@ -17,48 +15,39 @@ export interface UserInfoView {
     setFollowersCount: React.Dispatch<React.SetStateAction<number>>
 }
 
-export class UserInfoPresenter {
-    private view
+export class UserInfoPresenter extends BasePresenter<UserInfoView> {
     private service
     constructor(view: UserInfoView) {
-        this.view = view
+        super(view)
         this.service = new UserService()
     }
 
     async setIsFollowerStatus(authToken: AuthToken, currentUser: User, displayedUser: User) {
-        try {
+        this.tryWithReporting('determine follower status', async () => {
             if (currentUser === displayedUser) {
                 this.view.setIsFollower(false)
             } else {
-                this.view.setIsFollower(
-                    await this.service.getIsFollowerStatus(authToken!, currentUser!, displayedUser!)
-                )
+                this.view.setIsFollower(await this.service.getIsFollowerStatus(authToken!, currentUser!, displayedUser!))
                 console.log('obtained from service')
             }
-        } catch (error) {
-            this.view.displayErrorMessage(`Failed to determine follower status because of exception: ${error}`)
-        }
+        })
     }
 
     async setNumbFollowees(authToken: AuthToken, displayedUser: User) {
-        try {
+        this.tryWithReporting('get followees count', async () => {
             this.view.setFolloweesCount(await this.service.getFolloweesCount(authToken, displayedUser))
-        } catch (error) {
-            this.view.displayErrorMessage(`Failed to get followees count because of exception: ${error}`)
-        }
+        })
     }
 
     async setNumbFollowers(authToken: AuthToken, displayedUser: User) {
-        try {
+        this.tryWithReporting('get followers count', async () => {
             this.view.setFollowersCount(await this.service.getFollowersCount(authToken, displayedUser))
-        } catch (error) {
-            this.view.displayErrorMessage(`Failed to get followers count because of exception: ${error}`)
-        }
+        })
     }
 
     async followDisplayedUser(event: React.MouseEvent) {
         event.preventDefault()
-        try {
+        this.tryWithReporting('follow user', async () => {
             this.view.displayInfoMessage(`Adding ${this.view.displayedUser!.name} to followers...`, 0)
 
             let [followersCount, followeesCount] = await this.follow(this.view.authToken!, this.view.displayedUser!)
@@ -68,9 +57,7 @@ export class UserInfoPresenter {
             this.view.setIsFollower(true)
             this.view.setFolloweesCount(followersCount)
             this.view.setFolloweesCount(followeesCount)
-        } catch (error) {
-            this.view.displayErrorMessage(`Failed to follow user because of exception: ${error}`)
-        }
+        })
     }
 
     async follow(authToken: AuthToken, userToFollow: User): Promise<[followersCount: number, followeesCount: number]> {
@@ -88,7 +75,7 @@ export class UserInfoPresenter {
     async unfollowDisplayedUser(event: React.MouseEvent): Promise<void> {
         event.preventDefault()
 
-        try {
+        this.tryWithReporting('unfollow user', async () => {
             this.view.displayInfoMessage(`Removing ${this.view.displayedUser!.name} from followers...`, 0)
 
             let [followersCount, followeesCount] = await this.unfollow(this.view.authToken!, this.view.displayedUser!)
@@ -98,15 +85,10 @@ export class UserInfoPresenter {
             this.view.setIsFollower(false)
             this.view.setFolloweesCount(followersCount)
             this.view.setFolloweesCount(followeesCount)
-        } catch (error) {
-            this.view.displayErrorMessage(`Failed to unfollow user because of exception: ${error}`)
-        }
+        })
     }
 
-    async unfollow(
-        authToken: AuthToken,
-        userToUnfollow: User
-    ): Promise<[followersCount: number, followeesCount: number]> {
+    async unfollow(authToken: AuthToken, userToUnfollow: User): Promise<[followersCount: number, followeesCount: number]> {
         // Pause so we can see the unfollowing message. Remove when connected to the server
         await new Promise((f) => setTimeout(f, 2000))
 
