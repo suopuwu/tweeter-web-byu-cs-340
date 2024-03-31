@@ -4,13 +4,18 @@ import { BasePresenter, BaseView, MessageView } from './BasePresenter'
 
 export interface NavbarView extends MessageView {
     clearUserInfo: () => void
+    navigateToLogin: () => void
 }
 
 export class NavbarPresenter extends BasePresenter<NavbarView> {
-    private service
+    private _service
     constructor(view: NavbarView) {
         super(view)
-        this.service = new UserService()
+        this._service = new UserService()
+    }
+
+    get service() {
+        return this._service
     }
 
     async logOut(authToken: AuthToken) {
@@ -21,6 +26,7 @@ export class NavbarPresenter extends BasePresenter<NavbarView> {
 
             this.view.clearLastInfoMessage()
             this.view.clearUserInfo()
+            this.view.navigateToLogin()
         })
     }
 }

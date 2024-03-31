@@ -5,7 +5,11 @@ import useToastListener from '../toaster/ToastListenerHook'
 import useUserInfo from '../userInfo/UserInfoHook'
 import { PostStatusPresenter, PostStatusView } from '../../presenter/PostStatusPresenter'
 
-const PostStatus = () => {
+interface Props {
+    presenter?: PostStatusPresenter
+}
+
+const PostStatus = (props: Props) => {
     const { displayErrorMessage, displayInfoMessage, clearLastInfoMessage } = useToastListener()
 
     const { currentUser, authToken } = useUserInfo()
@@ -17,7 +21,7 @@ const PostStatus = () => {
         displayInfoMessage: displayInfoMessage,
         clearLastInfoMessage: clearLastInfoMessage,
     }
-    const presenter = new PostStatusPresenter(view)
+    const presenter = props.presenter ?? new PostStatusPresenter(view)
 
     return (
         <form>

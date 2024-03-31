@@ -11,6 +11,7 @@ import { LoginPresenter, LoginView } from '../../../presenter/LoginPresenter'
 
 interface Props {
     originalUrl?: string
+    presenter?: LoginPresenter
 }
 
 const Login = (props: Props) => {
@@ -42,7 +43,7 @@ const Login = (props: Props) => {
         updateUserInfo: updateUserInfo,
         displayErrorMessage: displayErrorMessage,
     }
-    const presenter = new LoginPresenter(view)
+    const presenter = props.presenter ?? new LoginPresenter(view)
     return (
         <AuthenticationFormLayout
             headingText="Please Sign In"
