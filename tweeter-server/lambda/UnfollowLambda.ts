@@ -1,7 +1,7 @@
-import { LoginRequest, AuthenticateResponse } from 'tweeter-shared'
-import { UserService } from '../model/service/UserService'
-export const handler = async (event: LoginRequest): Promise<AuthenticateResponse> => {
-    let response = new AuthenticateResponse(true, ...(await new UserService().login(event.username, event.password))) //todo
-
-    return response
+import { FakeData, ToggleFollowRequest, ToggleFollowResponse } from 'tweeter-shared'
+import { FollowService } from '../model/service/FollowService'
+export const handler = async (event: ToggleFollowRequest): Promise<ToggleFollowResponse> => {
+    let followService = new FollowService()
+    let success = await followService.unfollowUser(FakeData.instance.authToken, event.user, event.usernameToToggle)
+    return { success: success, message: null }
 }

@@ -1,7 +1,7 @@
-import { LoginRequest, AuthenticateResponse } from 'tweeter-shared'
-import { UserService } from '../model/service/UserService'
-export const handler = async (event: LoginRequest): Promise<AuthenticateResponse> => {
-    let response = new AuthenticateResponse(true, ...(await new UserService().login(event.username, event.password))) //todo
-
-    return response
+import { FakeData, GetUserListRequest, GetUserListResponse } from 'tweeter-shared'
+import { FollowService } from '../model/service/FollowService'
+export const handler = async (event: GetUserListRequest): Promise<GetUserListResponse> => {
+    let followService = new FollowService() //todo add support for auth tokens
+    let [users, hasMore] = await followService.loadMoreFollowees(FakeData.instance.authToken, event.user, event.pageSize, event.lastItem)
+    return { users: users, hasMore: hasMore, success: true, message: null }
 }

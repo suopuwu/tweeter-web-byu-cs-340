@@ -25,7 +25,7 @@ export class PostStatusPresenter extends BasePresenter<PostStatusView> {
             this.view.displayInfoMessage('Posting status...', 0)
 
             let status = new Status(this.view.post, currentUser!, Date.now())
-
+            //todo double check to make sure that users cannot post statuses for other users.
             await this.service.postStatus(authToken!, status)
 
             this.view.clearLastInfoMessage()

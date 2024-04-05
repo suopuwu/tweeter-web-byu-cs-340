@@ -18,6 +18,7 @@ export class BasePresenter<ViewType extends BaseView> {
         try {
             await operation()
         } catch (error) {
+            console.error(error)
             this.view.displayErrorMessage(`Failed to ${operationDescription} because of exception: ${(error as Error).message}`)
         }
     }

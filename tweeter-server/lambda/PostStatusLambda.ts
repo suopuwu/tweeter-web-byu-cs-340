@@ -1,7 +1,7 @@
-import { LoginRequest, AuthenticateResponse } from 'tweeter-shared'
-import { UserService } from '../model/service/UserService'
-export const handler = async (event: LoginRequest): Promise<AuthenticateResponse> => {
-    let response = new AuthenticateResponse(true, ...(await new UserService().login(event.username, event.password))) //todo
-
-    return response
+import { FakeData, PostStatusRequest, PostStatusResponse } from 'tweeter-shared'
+import { StatusService } from '../model/service/StatusService'
+export const handler = async (event: PostStatusRequest): Promise<PostStatusResponse> => {
+    let statusService = new StatusService()
+    await statusService.postStatus(FakeData.instance.authToken, event.newStatus)
+    return { success: true, message: null }
 }

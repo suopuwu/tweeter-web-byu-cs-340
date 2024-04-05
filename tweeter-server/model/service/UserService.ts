@@ -31,10 +31,11 @@ export class UserService {
     }
 
     async findUserByAlias(alias: string) {
-        return FakeData.instance.findUserByAlias(alias)
+        //todo make throw if not found
+        return FakeData.instance.findUserByAlias(alias)!
     }
 
-    async getIsFollowerStatus(authToken: AuthToken, user: User, selectedUser: User): Promise<boolean> {
+    async getIsFollowerStatus(authToken: AuthToken, userAlias: string, selectedUserAlias: string): Promise<boolean> {
         // TODO: Replace with the result of calling server
         return FakeData.instance.isFollower()
     }
