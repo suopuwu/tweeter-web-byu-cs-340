@@ -12,7 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
 const tweeter_shared_1 = require("tweeter-shared");
 const UserService_1 = require("../model/service/UserService");
+const FieldVerifier_1 = require("./FieldVerifier");
 const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
+    (0, FieldVerifier_1.verifyFields)(['user'], event);
     let userService = new UserService_1.UserService();
     let count = yield userService.getFolloweesCount(tweeter_shared_1.FakeData.instance.authToken, event.user);
     return { count: count, success: true, message: null };

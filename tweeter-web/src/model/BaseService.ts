@@ -1,5 +1,7 @@
 import { ServerFacade } from '../network/ServerFacade'
 
 export abstract class BaseService {
-    serverFacade = new ServerFacade()
+    get serverFacade(): ServerFacade {
+        return new ServerFacade()
+    }
 }

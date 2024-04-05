@@ -1,11 +1,9 @@
 import { User, AuthToken, FakeData } from 'tweeter-shared'
-import { ServerFacade } from '../network/ServerFacade'
 import { BaseService } from './BaseService'
 import { Buffer } from 'buffer'
 export class UserService extends BaseService {
     async login(alias: string, password: string): Promise<[User, AuthToken]> {
         let response = await this.serverFacade.signIn({ username: alias, password: password })
-        console.log(response)
         if (response.user === null) {
             throw new Error('Invalid alias or password')
         }
@@ -27,7 +25,7 @@ export class UserService extends BaseService {
             lastName: lastName,
             alias: alias,
             password: password,
-            userImageBytes: userImageBytes,
+            imageStringBase64: imageStringBase64,
         })
 
         if (response.user === null) {
@@ -46,20 +44,26 @@ export class UserService extends BaseService {
     }
 
     async getIsFollowerStatus(authToken: AuthToken, user: User, selectedUser: User): Promise<boolean> {
-        let response = await this.serverFacade.getUserIsFollowing(user.alias, selectedUser.alias, authToken)
+        let response = await this.serverFacade.getUserIsFollowing(user.alias, selectedUser.alias, {
+            followerUsername: user.alias,
+            followeeUsername: selectedUser.alias,
+            authToken: authToken,
+        })
         return response.isFollower
     }
 
     async getFolloweesCount(authToken: AuthToken, user: User): Promise<number> {
-        let response = await this.serverFacade.getFolloweeCount(user.alias, authToken)
-        return response.count
+        // let response = await this.serverFacade.getFolloweeCount(user.alias, { user: user, authToken: authToken })
+        // return response.count
+        return 0
     }
     async getFollowersCount(authToken: AuthToken, user: User): Promise<number> {
-        let response = await this.serverFacade.getFollowerCount(user.alias, authToken)
-        return response.count
+        // let response = await this.serverFacade.getFollowerCount(user.alias, { user: user, authToken: authToken })
+        // return response.count
+        return 0
     }
 
     async logout(authToken: AuthToken): Promise<void> {
-        await this.serverFacade.signOut(authToken)
+        await this.serverFacade.signOut({ authToken: authToken })
     }
 }

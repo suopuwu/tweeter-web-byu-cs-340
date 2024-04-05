@@ -1,6 +1,10 @@
 import { GetStatusListRequest, GetStatusListResponse, FakeData } from 'tweeter-shared'
 import { StatusService } from '../model/service/StatusService'
+import { verifyFields } from './FieldVerifier'
 export const handler = async (event: GetStatusListRequest): Promise<GetStatusListResponse> => {
+    //todo eventually, you will put something in service that verifies the authToken.
+    verifyFields(['user', 'pageSize', 'lastItem'], event)
+
     let statusService = new StatusService()
     let [statuses, hasMore] = await statusService.loadMoreFeed(FakeData.instance.authToken, event.user, event.pageSize, event.lastItem)
 

@@ -6,12 +6,7 @@ export class ClientCommunicator {
         this.SERVER_URL = SERVER_URL
     }
 
-    async sendRequest<T extends TweeterRequest>(
-        req: T,
-        endpoint: string,
-        method: string,
-        authToken: AuthToken | undefined
-    ): Promise<string> {
+    async sendRequest<T extends TweeterRequest>(req: T, endpoint: string, method: string): Promise<string> {
         const url = this.SERVER_URL + endpoint
         const request = {
             method: method,
@@ -20,12 +15,10 @@ export class ClientCommunicator {
             }),
             body: JSON.stringify(req ?? {}),
         }
-        if (authToken) request.headers.append('Authorization', authToken?.token)
         try {
             const resp: Response = await fetch(url, request)
             if (resp.ok) {
                 const response: string = await resp.text()
-                console.log('response:', response)
                 return response
             } else {
                 const error = await resp.json()

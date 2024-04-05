@@ -12,7 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
 const tweeter_shared_1 = require("tweeter-shared");
 const StatusService_1 = require("../model/service/StatusService");
+const FieldVerifier_1 = require("./FieldVerifier");
 const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
+    (0, FieldVerifier_1.verifyFields)(['user', 'pageSize', 'lastItem'], event);
     let statusService = new StatusService_1.StatusService();
     let [statuses, hasMore] = yield statusService.loadMoreStory(tweeter_shared_1.FakeData.instance.authToken, event.user, event.pageSize, event.lastItem);
     return { statuses: statuses, hasMore: hasMore, success: true, message: null };

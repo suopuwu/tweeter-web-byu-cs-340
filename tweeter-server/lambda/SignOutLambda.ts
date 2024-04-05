@@ -1,7 +1,10 @@
 import { AuthenticateResponse, LogoutRequest } from 'tweeter-shared'
 import { UserService } from '../model/service/UserService'
+import { verifyFields } from './FieldVerifier'
 export const handler = async (event: LogoutRequest): Promise<AuthenticateResponse> => {
+    verifyFields([], event)
+
     let userService = new UserService()
-    await userService.logout(event.token)
+    await userService.logout(event.authToken)
     return { user: null, token: null, success: true, message: null }
 }

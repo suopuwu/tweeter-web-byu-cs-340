@@ -11,7 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
 const UserService_1 = require("../model/service/UserService");
+const FieldVerifier_1 = require("./FieldVerifier");
 const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
+    (0, FieldVerifier_1.verifyFields)(['username', 'password'], event, false);
     let userService = new UserService_1.UserService();
     let [user, authToken] = yield userService.login(event.username, event.password);
     return { user: user, token: authToken, success: true, message: null };
