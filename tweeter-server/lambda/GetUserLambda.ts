@@ -1,4 +1,4 @@
-import { GetUserResponse, GetUserRequest } from 'tweeter-shared'
+import { GetUserResponse, GetUserRequest, requestParser } from 'tweeter-shared'
 import { UserService } from '../model/service/UserService'
 import { verifyFields } from './FieldVerifier'
 export const handler = async (event: GetUserRequest): Promise<GetUserResponse> => {

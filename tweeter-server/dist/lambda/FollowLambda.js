@@ -15,6 +15,7 @@ const FollowService_1 = require("../model/service/FollowService");
 const FieldVerifier_1 = require("./FieldVerifier");
 const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
     (0, FieldVerifier_1.verifyFields)(['user', 'usernameToToggle'], event);
+    event = tweeter_shared_1.requestParser.toggleFollow(event);
     let followService = new FollowService_1.FollowService();
     yield followService.followUser(tweeter_shared_1.FakeData.instance.authToken, event.user, event.usernameToToggle); //todo make this throw if something goes wrong
     return { success: true, message: null };

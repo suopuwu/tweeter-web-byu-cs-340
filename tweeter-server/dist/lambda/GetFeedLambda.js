@@ -16,6 +16,7 @@ const FieldVerifier_1 = require("./FieldVerifier");
 const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
     //todo eventually, you will put something in service that verifies the authToken.
     (0, FieldVerifier_1.verifyFields)(['user', 'pageSize', 'lastItem'], event);
+    event = tweeter_shared_1.requestParser.getStatusList(event);
     let statusService = new StatusService_1.StatusService();
     let [statuses, hasMore] = yield statusService.loadMoreFeed(tweeter_shared_1.FakeData.instance.authToken, event.user, event.pageSize, event.lastItem);
     return { statuses: statuses, hasMore: hasMore, success: true, message: null };

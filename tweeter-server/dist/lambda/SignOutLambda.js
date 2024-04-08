@@ -10,10 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
+const tweeter_shared_1 = require("tweeter-shared");
 const UserService_1 = require("../model/service/UserService");
 const FieldVerifier_1 = require("./FieldVerifier");
 const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
     (0, FieldVerifier_1.verifyFields)([], event);
+    event = tweeter_shared_1.requestParser.authenticated(event);
     let userService = new UserService_1.UserService();
     yield userService.logout(event.authToken);
     return { user: null, token: null, success: true, message: null };

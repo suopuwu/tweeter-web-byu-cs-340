@@ -18,9 +18,10 @@ import {
     GetUserListRequest,
     PostStatusRequest,
     LogoutRequest,
-    GetUserRequest,
     GetCountRequest,
     GetUserIsFollowingRequest,
+    responseParser,
+    GetUserRequest,
 } from 'tweeter-shared'
 import { ClientCommunicator } from './ClientCommunicator'
 
@@ -36,11 +37,12 @@ export class ServerFacade {
     ): Promise<ResponseType> {
         const response = await this.clientCommunicator.sendRequest<RequestType>(request, endpoint, method)
         const parsedResponse: ResponseType = JSON.parse(response)
-        console.log(parsedResponse)
-        if (!parsedResponse.success)
+        if (!parsedResponse.success) {
             throw new Error(
-                parsedResponse.message ?? `Response from ${endpoint} has no success value. The server probably sent an invalid response.`
+                parsedResponse.message ??
+                    `Response from ${endpoint} has no success value. The server probably sent an invalid response. Error: ${parsedResponse}`
             )
+        }
         return parsedResponse
     }
 
@@ -55,15 +57,19 @@ export class ServerFacade {
         return await this.useCommunicator<NoRequestBody, ResponseType>(endpoint, {}, 'get')
     }
     //todolist
-    //3. finish creating all the lambdas which return fake data and uploading them, as well as hooking them up with the api gateway.
+    //1. finish error handling
+    //2. add documentation in api gateway
     //4. Create automated tests
     //5. create uml diagrams
 
-    signIn = async (request: LoginRequest) => await this.postFunction<LoginRequest, AuthenticateResponse>('/auth/sign-in', request)
+    signIn = async (request: LoginRequest) =>
+        responseParser.authenticate(await this.postFunction<LoginRequest, AuthenticateResponse>('/auth/sign-in', request))
 
-    register = async (request: RegisterRequest) => await this.postFunction<RegisterRequest, AuthenticateResponse>('/auth/register', request)
+    register = async (request: RegisterRequest) =>
+        responseParser.authenticate(await this.postFunction<RegisterRequest, AuthenticateResponse>('/auth/register', request))
 
-    signOut = async (request: LogoutRequest) => await this.postFunction<NoRequestBody, AuthenticateResponse>('/auth/sign-out', request)
+    signOut = async (request: LogoutRequest) =>
+        responseParser.authenticate(await this.postFunction<NoRequestBody, AuthenticateResponse>('/auth/sign-out', request))
 
     postStatus = async (request: PostStatusRequest) =>
         await this.postFunction<PostStatusRequest, PostStatusResponse>('/content/post-status', request)
@@ -75,7 +81,8 @@ export class ServerFacade {
         await this.postFunction<ToggleFollowRequest, ToggleFollowResponse>(`/u/${request.usernameToToggle}/unfollow`, request)
 
     //ones that use get do not have a request body
-    getUser = async (username: string) => await this.getFunction<GetUserResponse>(`/u/${username}`)
+    getUser = async (request: GetUserRequest) =>
+        responseParser.getUser(await this.postFunction<GetUserRequest, GetUserResponse>(`/u/${request.username}`, request))
 
     getFolloweeCount = async (username: string, request: GetCountRequest) =>
         await this.postFunction<GetCountRequest, GetCountResponse>(`/u/${username}/count/followees`, request)
@@ -91,14 +98,15 @@ export class ServerFacade {
 
     //these ones must use post to have a request body, even if get may appear to fit better
     getFeed = async (request: GetStatusListRequest) =>
-        await this.postFunction<GetStatusListRequest, GetStatusListResponse>('/content/feed', request)
+        responseParser.getStatusList(await this.postFunction<GetStatusListRequest, GetStatusListResponse>('/content/feed', request))
 
     getStory = async (request: GetStatusListRequest) =>
-        await this.postFunction<GetStatusListRequest, GetStatusListResponse>('/content/story', request)
+        responseParser.getStatusList(await this.postFunction<GetStatusListRequest, GetStatusListResponse>('/content/story', request))
 
     getFollowees = async (request: GetUserListRequest) =>
-        await this.postFunction<GetUserListRequest, GetUserListResponse>('/content/followees', request)
+        responseParser.getUserList(await this.postFunction<GetUserListRequest, GetUserListResponse>('/content/followees', request))
 
-    getFollowers = async (request: GetUserListRequest) =>
-        await this.postFunction<GetUserListRequest, GetUserListResponse>('/content/followers', request)
+    getFollowers = async (request: GetUserListRequest) => {
+        return responseParser.getUserList(await this.postFunction<GetUserListRequest, GetUserListResponse>('/content/followers', request))
+    }
 }

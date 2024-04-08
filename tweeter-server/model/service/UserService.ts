@@ -15,7 +15,7 @@ export class UserService {
         lastName: string,
         alias: string,
         password: string,
-        userImageBytes: Uint8Array
+        userImageBytes: string
     ): Promise<[User, AuthToken]> {
         // Not neded now, but will be needed when you make the request to the server in milestone 3
         let imageStringBase64: string = Buffer.from(userImageBytes).toString('base64')

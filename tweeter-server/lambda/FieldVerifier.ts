@@ -1,5 +1,6 @@
 import { TweeterRequest } from 'tweeter-shared'
 
+//verifies that the object passed has the expected fields, plus authToken if authTokenRequired is true
 export function verifyFields(expectedFields: string[], request: TweeterRequest, authTokenRequired = true): void {
     let keys = Object.keys(request)
     if (authTokenRequired) expectedFields.push('authToken')

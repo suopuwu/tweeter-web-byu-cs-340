@@ -36,7 +36,7 @@ export class UserService extends BaseService {
     }
 
     async findUserByAlias(alias: string) {
-        let response = await this.serverFacade.getUser(alias)
+        let response = await this.serverFacade.getUser({ username: alias })
         if (response.user === null) {
             throw new Error('User not found')
         }
@@ -53,17 +53,25 @@ export class UserService extends BaseService {
     }
 
     async getFolloweesCount(authToken: AuthToken, user: User): Promise<number> {
-        // let response = await this.serverFacade.getFolloweeCount(user.alias, { user: user, authToken: authToken })
-        // return response.count
+        let response = await this.serverFacade.getFolloweeCount(user.alias, { user: user, authToken: authToken })
+        return response.count
         return 0
     }
     async getFollowersCount(authToken: AuthToken, user: User): Promise<number> {
-        // let response = await this.serverFacade.getFollowerCount(user.alias, { user: user, authToken: authToken })
-        // return response.count
+        let response = await this.serverFacade.getFollowerCount(user.alias, { user: user, authToken: authToken })
+        return response.count
         return 0
     }
 
     async logout(authToken: AuthToken): Promise<void> {
         await this.serverFacade.signOut({ authToken: authToken })
+    }
+
+    async followUser(authToken: AuthToken, usernameToFollow: string, user: User): Promise<void> {
+        await this.serverFacade.follow({ usernameToToggle: usernameToFollow, authToken: authToken, user: user })
+    }
+
+    async unfollowUser(authToken: AuthToken, usernameToUnfollow: string, user: User): Promise<void> {
+        await this.serverFacade.unfollow({ usernameToToggle: usernameToUnfollow, authToken: authToken, user: user })
     }
 }

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyFields = void 0;
+//verifies that the object passed has the expected fields, plus authToken if authTokenRequired is true
 function verifyFields(expectedFields, request, authTokenRequired = true) {
     let keys = Object.keys(request);
     if (authTokenRequired)

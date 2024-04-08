@@ -15,6 +15,7 @@ const StatusService_1 = require("../model/service/StatusService");
 const FieldVerifier_1 = require("./FieldVerifier");
 const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
     (0, FieldVerifier_1.verifyFields)(['newStatus'], event);
+    event = tweeter_shared_1.requestParser.postStatus(event);
     let statusService = new StatusService_1.StatusService();
     yield statusService.postStatus(tweeter_shared_1.FakeData.instance.authToken, event.newStatus);
     return { success: true, message: null };

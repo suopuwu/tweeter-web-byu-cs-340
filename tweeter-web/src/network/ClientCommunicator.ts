@@ -8,13 +8,15 @@ export class ClientCommunicator {
 
     async sendRequest<T extends TweeterRequest>(req: T, endpoint: string, method: string): Promise<string> {
         const url = this.SERVER_URL + endpoint
-        const request = {
-            method: method,
-            headers: new Headers({
-                'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            }),
-            body: JSON.stringify(req ?? {}),
-        }
+        const request = JSON.parse(
+            JSON.stringify({
+                method: method,
+                headers: new Headers({
+                    'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                }),
+                body: method != 'get' ? JSON.stringify(req) : undefined,
+            })
+        )
         try {
             const resp: Response = await fetch(url, request)
             if (resp.ok) {

@@ -50,7 +50,7 @@ export class UserInfoPresenter extends BasePresenter<UserInfoView> {
         this.tryWithReporting('follow user', async () => {
             this.view.displayInfoMessage(`Adding ${this.view.displayedUser!.name} to followers...`, 0)
 
-            let [followersCount, followeesCount] = await this.follow(this.view.authToken!, this.view.displayedUser!)
+            let [followersCount, followeesCount] = await this.follow(this.view.authToken!, this.view.displayedUser!, this.view.currentUser!)
 
             this.view.clearLastInfoMessage()
 
@@ -60,11 +60,8 @@ export class UserInfoPresenter extends BasePresenter<UserInfoView> {
         })
     }
 
-    async follow(authToken: AuthToken, userToFollow: User): Promise<[followersCount: number, followeesCount: number]> {
-        // Pause so we can see the following message. Remove when connected to the server
-        await new Promise((f) => setTimeout(f, 2000))
-
-        // TODO: Call the server
+    async follow(authToken: AuthToken, userToFollow: User, user: User): Promise<[followersCount: number, followeesCount: number]> {
+        this.service.followUser(authToken, userToFollow.alias, user)
 
         let followersCount = await this.service.getFollowersCount(authToken, userToFollow)
         let followeesCount = await this.service.getFolloweesCount(authToken, userToFollow)
@@ -78,7 +75,11 @@ export class UserInfoPresenter extends BasePresenter<UserInfoView> {
         this.tryWithReporting('unfollow user', async () => {
             this.view.displayInfoMessage(`Removing ${this.view.displayedUser!.name} from followers...`, 0)
 
-            let [followersCount, followeesCount] = await this.unfollow(this.view.authToken!, this.view.displayedUser!)
+            let [followersCount, followeesCount] = await this.unfollow(
+                this.view.authToken!,
+                this.view.displayedUser!,
+                this.view.currentUser!
+            )
 
             this.view.clearLastInfoMessage()
 
@@ -88,11 +89,8 @@ export class UserInfoPresenter extends BasePresenter<UserInfoView> {
         })
     }
 
-    async unfollow(authToken: AuthToken, userToUnfollow: User): Promise<[followersCount: number, followeesCount: number]> {
-        // Pause so we can see the unfollowing message. Remove when connected to the server
-        await new Promise((f) => setTimeout(f, 2000))
-
-        // TODO: Call the server
+    async unfollow(authToken: AuthToken, userToUnfollow: User, user: User): Promise<[followersCount: number, followeesCount: number]> {
+        this.service.unfollowUser(authToken, userToUnfollow.alias, user)
 
         let followersCount = await this.service.getFollowersCount(authToken, userToUnfollow)
         let followeesCount = await this.service.getFolloweesCount(authToken, userToUnfollow)

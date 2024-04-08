@@ -15,6 +15,7 @@ const FollowService_1 = require("../model/service/FollowService");
 const FieldVerifier_1 = require("./FieldVerifier");
 const handler = (event) => __awaiter(void 0, void 0, void 0, function* () {
     (0, FieldVerifier_1.verifyFields)(['user', 'pageSize', 'lastItem'], event);
+    event = tweeter_shared_1.requestParser.getUserList(event);
     let followService = new FollowService_1.FollowService(); //todo add support for auth tokens
     let [users, hasMore] = yield followService.loadMoreFollowers(tweeter_shared_1.FakeData.instance.authToken, event.user, event.pageSize, event.lastItem);
     return { users: users, hasMore: hasMore, success: true, message: null };
