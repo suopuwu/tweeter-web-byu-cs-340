@@ -6,7 +6,7 @@ export function verifyFields(expectedFields: string[], request: TweeterRequest, 
     if (authTokenRequired) expectedFields.push('authToken')
     if (keys.length != expectedFields.length)
         throw new Error(
-            `[Bad Request] The request is expected to have ${expectedFields.length} fields, ${keys.length} were provided. \nExpected: ${expectedFields}\nFound: ${keys}`
+            `[Bad Request] The request is expected to have ${expectedFields.length} fields, ${keys.length} were provided. Expected: ${expectedFields}. Found: ${keys}`
         )
     for (let expectedField of expectedFields) {
         if (!keys.includes(expectedField)) {

@@ -27,7 +27,7 @@ export class ClientCommunicator {
                 throw new Error(error.errorMessage)
             }
         } catch (err) {
-            throw new Error('Client communicator sendRequest failed:\n' + (err as Error).message)
+            throw err
         }
     }
 }
